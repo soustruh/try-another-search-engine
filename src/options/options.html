@@ -1,24 +1,35 @@
 <!doctype html>
-
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light dark" />
+        <title>Try another search engine — Settings</title>
+        <link rel="stylesheet" href="options.css" />
     </head>
-
     <body>
-        <div>
-            <h2>Share anonymous usage data</h2>
+        <main>
+            <section class="panel" aria-labelledby="enginesHeading">
+                <h2 id="enginesHeading">Search engines</h2>
+                <p class="help">
+                    Choose which engines appear and arrange them in your preferred order. Changes
+                    are saved automatically.
+                </p>
+                <ul id="engineList" class="engineList"></ul>
+            </section>
 
-            <p>
-                Collect anonymous information about switching search engines (including query and
-                source/target search engine)
-            </p>
-
-            <h3>
-                <input type="checkbox" id="collectData" name="collectData" value="true" checked />
-                <label for="collectData">Yes</label>
-            </h3>
-        </div>
+            <section class="panel" aria-labelledby="privacyHeading">
+                <h2 id="privacyHeading">Usage data</h2>
+                <label class="privacyLabel" for="collectData">
+                    <input type="checkbox" id="collectData" />
+                    <span
+                        >Send search queries, search page URLs, and clicked Google result URLs to
+                        Seznam for usage statistics.</span
+                    >
+                </label>
+            </section>
+        </main>
+        <script src="../common/searchEngines.js"></script>
         <script src="options.js"></script>
     </body>
 </html>

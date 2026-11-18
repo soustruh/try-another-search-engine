@@ -1,175 +1,121 @@
-const buttons = ["seznam", "google", "bing", "brave", "duckgo", "sznhint"];
-
-let query;
-
 async function main() {
     try {
-        let collectData = await restoreOptions("collectData", true);
-        console.log("Usage data " + (collectData ? "ARE" : "ARE NOT") + " collected");
+        const page = getSearchPage(new URL(location.href));
+        if (!page) return;
 
-        container = document.createElement("div");
-        container.id = "pmsAddon";
-        document.body.appendChild(container);
-        document.getElementById("pmsAddon").innerHTML = containerTemplate;
-
-        args = location.search.substr(1).split("&");
-        for (let i = 0; i < args.length; i++) {
-            arg = args[i].split("=");
-            if (arg[0] == "q") {
-                query = arg[1];
-            }
-        }
-
-        document
-            .querySelector("#pmsAddon #seznam img")
-            .setAttribute("src", chrome.extension.getURL("icons/seznam.png"));
-        document
-            .querySelector("#pmsAddon #google img")
-            .setAttribute("src", chrome.extension.getURL("icons/google.png"));
-        document
-            .querySelector("#pmsAddon #bing img")
-            .setAttribute("src", chrome.extension.getURL("icons/bing.png"));
-        document
-            .querySelector("#pmsAddon #brave img")
-            .setAttribute("src", chrome.extension.getURL("icons/brave.png"));
-        document
-            .querySelector("#pmsAddon #duckgo img")
-            .setAttribute("src", chrome.extension.getURL("icons/duckgo.png"));
-
-        for (let i = 0; i < locations.length; i++) {
-            loc = locations[i];
-            if (loc.host != location.host) continue;
-            if ("pathname" in loc && location.pathname != loc.pathname) continue;
-            if ("search" in loc && !location.search.includes(loc.search)) continue;
-            console.log("Match: " + loc.title + "!");
-            for (let j = 0; j < buttons.length; j++) {
-                let button = buttons[j];
-                if (loc[button]) {
-                    let el = document.querySelector("#pmsAddon #" + button);
-                    el.href = loc[button] + query;
-                    if (!collectData) continue;
-                    el.addEventListener("click", function () {
-                        data = {
-                            action: "switch",
-                            data: {
-                                query: query,
-                                mode: loc.mode,
-                                source: loc.title,
-                                sourceUrl: document.location.href,
-                                target: button,
-                                targetUrl: el.href,
-                            },
-                        };
-                        chrome.runtime.sendMessage(data);
-                    });
-                } else {
-                    let el = document.querySelector("#pmsAddon #" + button);
-                    el.classList.add("disabled");
-                    el.href = "#";
-                }
-            }
-            break;
-        }
-
-        document.querySelector("#pmsAddon #switch").addEventListener(
-            "click",
-            function () {
-                document.querySelector("#pmsAddon").classList.add("hide");
-            },
-            false,
+        const settings = normalizeEngineSettings(
+            await browser.storage.sync.get(["engineOrder", "disabledEngines"]),
         );
+        const collectData = await restoreOptions("collectData", true);
+        const engines = settings.engineOrder
+            .filter((id) => !settings.disabledEngines.includes(id))
+            .map((id) => searchEngines.find((engine) => engine.id === id));
+        const destinations = engines.filter((engine) => engine.id !== page.engine.id);
+        if (!destinations.length) return;
 
-        if (collectData) {
+        const toolbar = document.createElement("div");
+        toolbar.id = "pmsAddon";
+        toolbar.setAttribute("aria-label", "Try another search engine");
+
+        const links = document.createElement("span");
+        links.id = "links";
+        toolbar.appendChild(links);
+
+        for (const engine of destinations) {
+            const link = document.createElement("a");
+            link.href =
+                engine[page.mode === "images" ? "images" : "web"] + encodeURIComponent(page.query);
+            link.title = engine.name;
+            link.setAttribute("aria-label", `Search with ${engine.name}`);
+
+            const icon = document.createElement("img");
+            icon.src = browser.runtime.getURL(engine.icon);
+            icon.alt = "";
+            icon.width = 32;
+            icon.height = 32;
+            link.appendChild(icon);
+            links.appendChild(link);
+
+            if (collectData) {
+                link.addEventListener("click", () => {
+                    browser.runtime.sendMessage({
+                        action: "switch",
+                        data: {
+                            query: page.query,
+                            mode: page.mode,
+                            source: page.engine.name,
+                            sourceUrl: location.href,
+                            target: engine.id,
+                            targetUrl: link.href,
+                        },
+                    });
+                });
+            }
+        }
+
+        const close = document.createElement("button");
+        close.className = "closeButton";
+        close.type = "button";
+        close.textContent = "×";
+        close.setAttribute("aria-label", "Close search engine toolbar");
+        close.addEventListener("click", () => {
+            toolbar.classList.add("hide");
+            toolbar.inert = true;
+        });
+        toolbar.appendChild(close);
+        document.body.appendChild(toolbar);
+
+        if (collectData && page.engine.id === "google") {
             tagGoogleResults();
-            addResultsClickListeners(query);
-            // findOrganicResults()
-            // addSERPClickListeners()
+            addResultsClickListeners(page.query);
         }
-
-        /*
-        if (location.host == "search.seznam.cz" && query) {
-            var rssUrl = "//search.seznam.cz/?format=rss&q=" + query
-            $.get(rssUrl, function (data) {
-                console.log("Using default tag name (opensearch:totalResults)")
-                tr = data.getElementsByTagName("opensearch:totalResults")
-                if (!tr.length) {
-                    console.log("Chrome tag name workaround (totalResults)")
-                    tr = data.getElementsByTagName("totalResults")
-                }
-                if (!tr.length) {
-                    console.log("Result count not found")
-                } else {
-                    totalResults = Number(tr[0].textContent).toLocaleString()
-                    console.log(totalResults)
-
-                    resultsEl = document.querySelector("#pmsAddon #results")
-                    resultsEl.html = "Výsledků: " + totalResults
-                    resultsEl.show()
-                }
-            });
-        }
-        */
-    } catch (err) {
-        console.log(err);
+    } catch (error) {
+        console.error("Try another search engine:", error);
     }
 }
 
 function tagGoogleResults() {
-    const DEFAULT_URL_LEFT = "unknown-left";
-    const DEFAULT_URL_RIGHT = "unknown-right";
+    const defaultLeftUrl = "unknown-left";
+    const defaultRightUrl = "unknown-right";
 
-    googleResults = document.querySelectorAll("#rso > div");
-    console.log("Found " + googleResults.length + " results");
-    let i = 0;
-    googleResults.forEach((el) => {
-        el.setAttribute("data-tryanother", "true");
-        el.setAttribute("data-tryanother-position", i);
-        el.setAttribute("data-tryanother-url", DEFAULT_URL_LEFT);
+    document.querySelectorAll("#rso > div").forEach((result, position) => {
+        result.dataset.tryanother = "true";
+        result.dataset.tryanotherPosition = position;
+        result.dataset.tryanotherUrl = defaultLeftUrl;
 
-        let links = el.querySelectorAll("a");
-        if (links.length == 1) {
-            if (links[0].href) el.setAttribute("data-tryanother-url", links[0].href);
+        const links = result.querySelectorAll("a");
+        if (links.length === 1 && links[0].href) {
+            result.dataset.tryanotherUrl = links[0].href;
         } else if (links.length > 1) {
-            let j = 0;
-            links.forEach((lnk) => {
-                lnk.setAttribute("data-tryanother", "true");
-                lnk.setAttribute("data-tryanother-position", i + "-" + j);
-                if (lnk.href) href = lnk.href;
-                else href = DEFAULT_URL_LEFT;
-                lnk.setAttribute("data-tryanother-url", href);
-                j++;
+            links.forEach((link, linkPosition) => {
+                link.dataset.tryanother = "true";
+                link.dataset.tryanotherPosition = `${position}-${linkPosition}`;
+                link.dataset.tryanotherUrl = link.href || defaultLeftUrl;
             });
         }
-        i++;
     });
 
-    googleRight = document.querySelector("#rhs");
-    if (googleRight) {
-        googleRight.setAttribute("data-tryanother", "true");
-        googleRight.setAttribute("data-tryanother-position", 0);
-        googleRight.setAttribute("data-tryanother-url", DEFAULT_URL_RIGHT);
+    const rightResults = document.querySelector("#rhs");
+    if (rightResults) {
+        rightResults.dataset.tryanother = "true";
+        rightResults.dataset.tryanotherPosition = 0;
+        rightResults.dataset.tryanotherUrl = defaultRightUrl;
     }
 }
 
 function addResultsClickListeners(query) {
-    document.querySelector("body").addEventListener("mousedown", (event) => {
-        let el = event.target.closest("[data-tryanother=true]");
-        if (!el) return;
+    document.body.addEventListener("mousedown", (event) => {
+        const result = event.target.closest("[data-tryanother=true]");
+        if (!result) return;
 
-        let url = el.getAttribute("data-tryanother-url");
-        let position = el.getAttribute("data-tryanother-position");
-        let data = {
-            query: query,
-            url: url,
-            position: position,
-        };
-        console.log(data);
-
-        message = {
+        browser.runtime.sendMessage({
             action: "click",
-            data: data,
-        };
-        chrome.runtime.sendMessage(message);
+            data: {
+                query,
+                url: result.dataset.tryanotherUrl,
+                position: result.dataset.tryanotherPosition,
+            },
+        });
     });
 }
 
