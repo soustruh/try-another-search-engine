@@ -1,16 +1,16 @@
-async function postData(url = '', data = {}) {
+async function postData(url = "", data = {}) {
     const response = await fetch(url, {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        credentials: 'same-origin',
+        method: "POST",
+        mode: "cors",
+        cache: "no-cache",
+        credentials: "same-origin",
         headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json",
         },
-        redirect: 'follow',
-        referrerPolicy: 'no-referrer',
-        body: JSON.stringify(data)
+        redirect: "follow",
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify(data),
     });
-    console.log(response)
+    console.log(response);
     return response.status;
 }

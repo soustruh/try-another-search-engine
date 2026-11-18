@@ -1,0 +1,12 @@
+#!/bin/sh
+# Refuse a commit when a staged file does not follow the Prettier code style.
+
+files=$(git diff --cached --name-only --diff-filter=ACMR)
+if [ -z "$files" ]; then
+    exit 0
+fi
+
+if ! echo "$files" | xargs npx --no-install prettier --check --ignore-unknown; then
+    echo "Format the files first: npm run format"
+    exit 1
+fi

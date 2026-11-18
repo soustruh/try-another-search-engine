@@ -24,9 +24,7 @@
                 "*://duckduckgo.com/*",
                 "*://search.brave.com/*"
             ],
-            "css": [
-                "src/content/content.css"
-            ],
+            "css": ["src/content/content.css"],
             "js": [
                 "src/common/restoreOptions.js",
                 "src/content/locations.js",
@@ -38,12 +36,8 @@
     "options_ui": {
         "page": "src/options/options.html"
     },
-    "permissions": [
-        "storage"
-    ],
-    "web_accessible_resources": [
-        "icons/*"
-    ],
+    "permissions": ["storage"],
+    "web_accessible_resources": ["icons/*"],
     "browser_specific_settings": {
         "gecko": {
             "id": "{14c48e36-100d-4d9b-a11a-890112654de9}"

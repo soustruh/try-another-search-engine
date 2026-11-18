@@ -1,16 +1,17 @@
-const bing = "https://www.bing.com/search?q="
-const brave = "https://search.brave.com/search?q="
-const duckgo = "https://duckduckgo.com/?q="
-const google = "https://www.google.com/search?q="
-const seznam = "https://search.seznam.cz/?q="
-const sznhint = "https://search.seznam.cz/hint?q="
-const obrazky = "https://www.obrazky.cz/?q="
-const bingimg = "https://www.bing.com/images/search?q="
-const bravimg = "https://search.brave.com/images?q="
-const googimg = "https://www.google.com/search?tbm=isch&q="
-const duckimg = "https://duckduckgo.com/?ia=images&iax=images&q="
+const bing = "https://www.bing.com/search?q=";
+const brave = "https://search.brave.com/search?q=";
+const duckgo = "https://duckduckgo.com/?q=";
+const google = "https://www.google.com/search?q=";
+const seznam = "https://search.seznam.cz/?q=";
+const sznhint = "https://search.seznam.cz/hint?q=";
+const obrazky = "https://www.obrazky.cz/?q=";
+const bingimg = "https://www.bing.com/images/search?q=";
+const bravimg = "https://search.brave.com/images?q=";
+const googimg = "https://www.google.com/search?tbm=isch&q=";
+const duckimg = "https://duckduckgo.com/?ia=images&iax=images&q=";
 
-const locations = [{
+const locations = [
+    {
         title: "Seznam",
         mode: "hints",
         host: "search.seznam.cz",
@@ -20,7 +21,7 @@ const locations = [{
         bing: bing,
         brave: brave,
         duckgo: duckgo,
-        sznhint: null
+        sznhint: null,
     },
     {
         title: "Seznam",
@@ -32,7 +33,7 @@ const locations = [{
         bing: bing,
         brave: brave,
         duckgo: duckgo,
-        sznhint: sznhint
+        sznhint: sznhint,
     },
     {
         title: "Seznam",
@@ -77,7 +78,7 @@ const locations = [{
         bing: bing,
         brave: brave,
         duckgo: duckgo,
-        sznhint: sznhint
+        sznhint: sznhint,
     },
     {
         title: "Google",
@@ -88,7 +89,7 @@ const locations = [{
         bing: bing,
         brave: brave,
         duckgo: duckgo,
-        sznhint: sznhint
+        sznhint: sznhint,
     },
     /* item with search needs to go first */
     {
@@ -111,7 +112,7 @@ const locations = [{
         bing: bing,
         brave: brave,
         duckgo: null,
-        sznhint: sznhint
+        sznhint: sznhint,
     },
     {
         title: "Bing",
@@ -123,7 +124,7 @@ const locations = [{
         bing: null,
         brave: brave,
         duckgo: duckgo,
-        sznhint: sznhint
+        sznhint: sznhint,
     },
     {
         title: "Bing",
@@ -146,7 +147,7 @@ const locations = [{
         bing: bing,
         brave: null,
         duckgo: duckgo,
-        sznhint: sznhint
+        sznhint: sznhint,
     },
     {
         title: "Brave",
@@ -158,5 +159,5 @@ const locations = [{
         bing: bingimg,
         brave: null,
         duckgo: duckimg,
-    }
-]
+    },
+];
