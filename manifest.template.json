@@ -38,7 +38,8 @@
     "web_accessible_resources": ["icons/*"],
     "browser_specific_settings": {
         "gecko": {
-            "id": "{14c48e36-100d-4d9b-a11a-890112654de9}"
+            "id": "{14c48e36-100d-4d9b-a11a-890112654de9}",
+            "strict_min_version": "153.0"
         }
     }
 }

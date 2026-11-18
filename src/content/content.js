@@ -1,7 +1,7 @@
 async function main() {
     try {
-        const page = getSearchPage(new URL(location.href));
-        if (!page) return;
+        const source = searchEngines.find((engine) => engine.hosts.includes(location.hostname));
+        if (!source) return;
 
         const settings = normalizeEngineSettings(
             await browser.storage.sync.get(["engineOrder", "disabledEngines"]),
@@ -10,7 +10,7 @@ async function main() {
         const engines = settings.engineOrder
             .filter((id) => !settings.disabledEngines.includes(id))
             .map((id) => searchEngines.find((engine) => engine.id === id));
-        const destinations = engines.filter((engine) => engine.id !== page.engine.id);
+        const destinations = engines.filter((engine) => engine.id !== source.id);
         if (!destinations.length) return;
 
         const toolbar = document.createElement("div");
@@ -21,10 +21,9 @@ async function main() {
         links.id = "links";
         toolbar.appendChild(links);
 
-        for (const engine of destinations) {
+        let page;
+        const searchLinks = destinations.map((engine) => {
             const link = document.createElement("a");
-            link.href =
-                engine[page.mode === "images" ? "images" : "web"] + encodeURIComponent(page.query);
             link.title = engine.name;
             link.setAttribute("aria-label", `Search with ${engine.name}`);
 
@@ -38,6 +37,7 @@ async function main() {
 
             if (collectData) {
                 link.addEventListener("click", () => {
+                    if (!page) return;
                     browser.runtime.sendMessage({
                         action: "switch",
                         data: {
@@ -51,7 +51,8 @@ async function main() {
                     });
                 });
             }
-        }
+            return { engine, link };
+        });
 
         const close = document.createElement("button");
         close.className = "closeButton";
@@ -63,15 +64,44 @@ async function main() {
             toolbar.inert = true;
         });
         toolbar.appendChild(close);
-        document.body.appendChild(toolbar);
 
-        if (collectData && page.engine.id === "google") {
-            tagGoogleResults();
-            addResultsClickListeners(page.query);
+        watchSearchPage((currentPage) => {
+            page = currentPage;
+            updateToolbar(toolbar, searchLinks, page);
+            if (page && collectData && source.id === "google") tagGoogleResults();
+        });
+
+        if (collectData && source.id === "google") {
+            addResultsClickListeners(() => page?.query);
         }
     } catch (error) {
         console.error("Try another search engine:", error);
     }
+}
+
+function updateToolbar(toolbar, searchLinks, page) {
+    toolbar.hidden = !page;
+    if (!page) return;
+
+    const mode = page.mode === "images" ? "images" : "web";
+    const query = encodeURIComponent(page.query);
+    for (const { engine, link } of searchLinks) {
+        link.href = engine[mode] + query;
+    }
+    if (!toolbar.isConnected) document.body.appendChild(toolbar);
+}
+
+function watchSearchPage(onChange) {
+    let previousUrl;
+    function checkUrl() {
+        const url = location.href;
+        if (url === previousUrl) return;
+        previousUrl = url;
+        onChange(getSearchPage(new URL(url)));
+    }
+
+    checkUrl();
+    window.navigation.addEventListener("currententrychange", checkUrl);
 }
 
 function tagGoogleResults() {
@@ -103,10 +133,11 @@ function tagGoogleResults() {
     }
 }
 
-function addResultsClickListeners(query) {
+function addResultsClickListeners(getQuery) {
     document.body.addEventListener("mousedown", (event) => {
         const result = event.target.closest("[data-tryanother=true]");
-        if (!result) return;
+        const query = getQuery();
+        if (!result || !query) return;
 
         browser.runtime.sendMessage({
             action: "click",
