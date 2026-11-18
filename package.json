@@ -2,7 +2,6 @@
     "name": "try-another-search-engine",
     "private": true,
     "type": "module",
-    "version": "0.10.0",
     "scripts": {
         "prepare": "git config core.hooksPath .githooks",
         "format": "prettier --write .",

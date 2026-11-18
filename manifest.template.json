@@ -1,7 +1,6 @@
 {
     "manifest_version": 2,
     "name": "Try another search engine",
-    "version": "0.10.0",
     "description": "Allows quick cycling through predefined search engines (Seznam \ud83d\udc36, Google, Bing, Brave & DuckDuckGo \ud83e\udd86) results",
     "icons": {
         "48": "icons/ses_48.png"
