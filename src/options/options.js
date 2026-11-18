@@ -80,18 +80,9 @@ function renderEngines() {
 }
 
 async function restoreSettings() {
-    const settings = await browser.storage.sync.get([
-        "engineOrder",
-        "disabledEngines",
-        "collectData",
-    ]);
+    const settings = await browser.storage.sync.get(["engineOrder", "disabledEngines"]);
     engineSettings = normalizeEngineSettings(settings);
-    document.getElementById("collectData").checked = settings.collectData ?? true;
     renderEngines();
 }
-
-document.getElementById("collectData").addEventListener("change", (event) => {
-    browser.storage.sync.set({ collectData: event.target.checked });
-});
 
 restoreSettings();
