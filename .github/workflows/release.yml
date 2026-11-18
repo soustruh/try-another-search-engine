@@ -1,0 +1,30 @@
+name: Publish Firefox add-on
+
+on:
+    push:
+        tags:
+            - "[0-9]*.[0-9]*.[0-9]*"
+
+permissions:
+    contents: read
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+            - uses: actions/setup-node@v7
+              with:
+                  node-version: "24"
+                  cache: npm
+            - run: npm ci
+            - run: npm run check
+            - run: npm run lint:firefox
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
+            - run: npm run sign:firefox -- --amo-metadata=.github/amo-metadata.json
+              env:
+                  RELEASE_TAG: ${{ github.ref_name }}
+                  WEB_EXT_API_KEY: ${{ secrets.AMO_JWT_ISSUER }}
+                  WEB_EXT_API_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+                  WEB_EXT_APPROVAL_TIMEOUT: "0"
