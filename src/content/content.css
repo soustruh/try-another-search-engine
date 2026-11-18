@@ -1,0 +1,96 @@
+#pmsAddon {
+    box-sizing: content-box;
+    position: fixed;
+    top: 0px;
+    left: 60%;
+    background: #fff;
+    border-radius: 0 0 12px 12px;
+    padding: 0 10px;
+    box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.1);
+    text-transform: lowercase;
+    /* 2^31 - 1 */
+    z-index: 2147483647;
+}
+
+#pmsAddon.hide {
+    opacity: 0;
+    transition: opacity 200ms;
+}
+
+#pmsAddon a {
+    display: inline-block;
+    padding: 10px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 12px;
+    color: #999;
+    line-height: 32px;
+    text-decoration: none;
+    outline: none;
+}
+
+#pmsAddon a.disabled {
+    cursor: default;
+    opacity: 0.25;
+}
+
+#pmsAddon a#switch {
+    font-weight: bold;
+}
+
+#pmsAddon a img {
+    width: 32px;
+    height: 32px;
+    vertical-align: bottom;
+    transition: transform .1s;
+    border-radius: 16px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, .3);
+}
+
+#pmsAddon a:hover:not(.disabled) img,
+#pmsAddon a#switch:hover {
+    transform: scale(1.6);
+}
+
+#pmsAddon a#sznhint:hover:not(.disabled) {
+    transform: scale(1.3);
+}
+
+@media (max-width: 799px) {
+    #pmsAddon {
+        top: auto;
+        right: 0;
+        bottom: 20%;
+        left: auto;
+        width: 50px;
+        border-radius: 20px 0 0 20px;
+        padding: 10px 0;
+        text-align: center;
+    }
+
+    #pmsAddon #sznhint {
+        display: none !important;
+    }
+
+    #pmsAddon a {
+        line-height: 1;
+    }
+}
+
+.resultFeedback {
+    position: absolute;
+    top: -12px;
+    left: -16px;
+    margin: 0;
+    padding: 4px 8px;
+    border-radius: 24px;
+    cursor: pointer;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 0 12px rgba(0, 0, 0, .15);
+    z-index: 5;
+    transition: margin .1s, padding .1s, border-radius .1s;
+}
+
+.resultFeedback a {
+    text-decoration: none;
+}
