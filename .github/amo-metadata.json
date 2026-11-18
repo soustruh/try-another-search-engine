@@ -1,7 +1,0 @@
-{
-    "version": {
-        "release_notes": {
-            "en-US": "Enabling automated Firefox add-on releases through GitHub Actions."
-        }
-    }
-}
