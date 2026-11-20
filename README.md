@@ -1,6 +1,8 @@
 # Try another search engine
 
-Firefox extension for switching between search engines from a results page. The existing Firefox add-on is [available on AMO](https://addons.mozilla.org/firefox/addon/try-another-search-engine/).
+Switch between Google, Seznam, DuckDuckGo, Ecosia, Bing, and Brave from a web or image search results page. The extension is [available on AMO](https://addons.mozilla.org/firefox/addon/try-another-search-engine/) for Firefox 153 and later on desktop and Android.
+
+The extension does not collect telemetry. When you choose a different search engine, the extension uses your current query to open that engine's results.
 
 ## Development
 
